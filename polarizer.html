@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Polarization Demo</title>
+    <style>
+        /* Regular CSS replacing Tailwind directives */
+
+        .centerContainer {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            padding: 0 20px;
+
+        }
+
+        .componentRow {
+            display: flex;
+            justify-content: space-evenly; /* This will spread the items more evenly */
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .unpolarizedLightContainer, .polarizer-container, .screenWithCosValue {
+             margin: 0 10px; /* Add some margin to each component */
+             text-align: center; /* Center the text for each component */
+        }
+
+/* Optional: Adjust the width of each component if needed */
+        .unpolarizedLightContainer, .polarizer-container, .screenWithCosValue {
+           width: 150px; /* Example width, adjust as needed */
+        }
+        .controls {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 10px;
+            width: 100%;
+            max-width: 600px;
+            margin: 20px auto;
+        }
+
+        .slider {
+            width: 100%;
+            margin: 10px 0;
+        }
+
+        .numberInput {
+            margin: 5px;
+            padding: 5px;
+            width: auto;
+        }
+
+        .feature {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            margin: 10px;
+            font-size: 16px;
+            color: #666;
+            background-color: rgba(255, 255, 255, 0.8);
+            padding: 5px;
+            border-radius: 4px;
+            z-index: 1000;
+        }
+        .unpolarizedLightContainer {
+            position: relative;
+            width: 100%; /* Set the desired width */
+            height: 100px; /* Set the desired height */
+        
+        }
+
+        .particle {
+            animation-duration: 2s;
+            animation-timing-function: linear;
+            animation-iteration-count: infinite;
+            animation-fill-mode: forwards;
+        }
+
+        .up {
+            animation-name: moveUp;
+        }
+
+        .down {
+            animation-name: moveDown;
+        }
+
+        .left {
+            animation-name: moveLeft;
+        }
+
+        .right {
+            animation-name: moveRight;
+        }
+
+        @keyframes moveUp {
+            0% { transform: translateY(0); }
+            100% { transform: translateY(-30px); }
+        }
+
+        @keyframes moveDown {
+            0% { transform: translateY(0); }
+            100% { transform: translateY(30px); }
+        }
+
+        @keyframes moveLeft {
+            0% { transform: translateX(0); }
+            100% { transform: translateX(-30px); }
+        }
+
+        @keyframes moveRight {
+            0% { transform: translateX(0); }
+            100% { transform: translateX(30px); }
+        }
+        
+        .lightWaveContainer {
+            position: relative;
+            width: 100%;
+            height: 100px; /* Set to the height of your wave */
+            margin-top: 50px;
+        }
+        .screenWithCosValue {
+            width: 100px;
+            height: 100px;
+        }
+        
+        .cosValueLine {
+            transition: all 0.5s ease-in-out;
+        }
+
+        /* Add additional CSS from LightWave.css, ScreenWithCosValue.css, and UnpolarizedLight.css here */
+    </style>
+</head>
+<body>
+    <div class="centerContainer">
+        <h1>Polarizers and Analyzers</h1>
+        <div class="componentRow">
+                <div class="polarizer-container">
+                <h2>Unpolarizer light</h2>
+                <svg width="100" height="100">
+                    <circle cx="50" cy="50" r="40" stroke="black" strokeWidth="3" fill="black" />
+                    <text x="15" y="55" font-size="10">Unpolarized</text>
+                    <circle class="particle up" cx="50" cy="50" r="3" fill="yellow" />
+                    <circle class="particle down" cx="50" cy="50" r="3" fill="yellow" />
+                    <circle class="particle left" cx="50" cy="50" r="3" fill="yellow" />
+                    <circle class="particle right" cx="50" cy="50" r="3" fill="yellow" />
+                </svg>
+            </div>
+            <div class="polarizer-container">
+                <h2>Polarizer</h2>
+                <svg class="polarizer-svg" width="100" height="100">
+                    <g transform="rotate(0, 50, 50)">
+                        <rect x="20" y="20" width="60" height="60" fill="grey" />
+                        <line x1="20" y1="50" x2="80" y2="50" stroke="black" />
+                    </g>
+                </svg>
+            </div>
+            <div class="polarizer-container">
+                <h2>Analyzer</h2>
+                <svg id="analyzerSvg" width="100" height="100">
+                    <g id="analyzerGroup">
+                        <rect x="20" y="20" width="60" height="60" fill="grey" />
+                        <line x1="20" y1="50" x2="80" y2="50" stroke="black" />
+                    </g>
+                </svg>
+            </div>
+            <div class="polarizer-container">
+                <h2>Screen</h2>
+                <svg width="100" height="100">
+                    <rect x="10" y="10" width="80" height="80" fill="lightgrey" />
+                    <line id="cosValueLine" x1="10" y1="50" x2="90" y2="50" stroke="red" strokeWidth="2" />
+                </svg>
+                <p id="cosValueText">cos²(θ): 1.00</p>
+            </div>
+        </div>
+        <div class="lightWaveContainer">
+            <svg id="lightWaveSvg" width="100%" height="100px" viewBox="0 0 200 100" preserveAspectRatio="none">
+                <path id="lightWavePath" fill="none" stroke="red" strokeWidth="2" />
+            </svg>
+        </div>
+        <p>I = ½ I<sub>0</sub> cos<sup>2</sup>θ</p>
+        <div class="controls">
+            <label for="angleRange">Angle (θ):</label>
+            <input id="angleRange" type="range" min="0" max="360" class="slider" oninput="updateValues()" />
+        </div>
+        <p id="currentAngle">Current Angle: 0.00°</p>
+        <p id="currentIntensity">Current Intensity: 1.00</p>
+        <p id="currentIntensityRatio">Current Intensity Ratio: I/I0 = 1.00</p>
+        <p id="currentIntensityPercentage">Current Intensity Ratio %: 100%</p>
+        <p class='feature'> Created by Hussein Nextjs converted to HTML Dec, 11</p>
+    </div>
+
+    <script>
+       const wavePath = document.getElementById('lightWavePath');
+
+function generateWavePath(amplitude) {
+    let path = 'M 0 50 ';
+    for (let x = 0; x <= 200; x++) {
+        const y = 50 + amplitude * Math.cos(x * 0.1); // Adjust the multiplier for wavelength
+        path += `L ${x} ${y} `;
+    }
+    return path;
+}
+
+function updateWave(intensity) {
+    const amplitude = intensity * 75; // Scale amplitude to be visible
+    const pathData = generateWavePath(amplitude);
+    wavePath.setAttribute('d', pathData);
+}
+
+function updateScreenWithCosValue(intensity) {
+    var cosValueLine = document.getElementById("cosValueLine");
+    var cosValueText = document.getElementById("cosValueText");
+    var svgHeight = 100;
+    var margin = 10;
+    var yPos = ((1 - intensity) * (svgHeight - 2 * margin)) + margin;
+
+    cosValueLine.setAttribute("y1", yPos);
+    cosValueLine.setAttribute("y2", yPos);
+    cosValueText.textContent = "cos²(θ): " + intensity.toFixed(2);
+}
+
+function updateAnalyzerRotation(angle) {
+    var analyzerGroup = document.getElementById("analyzerGroup");
+    analyzerGroup.setAttribute("transform", `rotate(${angle}, 50, 50)`);
+}
+
+function updateValues() {
+    var angle = document.getElementById("angleRange").value;
+    var currentAngle = document.getElementById("currentAngle");
+    var currentIntensity = document.getElementById("currentIntensity");
+    var currentIntensityRatio = document.getElementById("currentIntensityRatio");
+    var currentIntensityPercentage = document.getElementById("currentIntensityPercentage");
+
+    var intensity = 0.5 * Math.cos(angle * Math.PI / 180) ** 2;
+    var intensityPercentage = intensity * 100;
+
+    currentAngle.textContent = "Current Angle: " + angle + "°";
+    currentIntensity.textContent = "Current Intensity: " + intensity.toFixed(2);
+    currentIntensityRatio.textContent = "Current Intensity Ratio: I/I0 = " + intensity.toFixed(2);
+    currentIntensityPercentage.textContent = "Current Intensity Ratio %: " + intensityPercentage.toFixed(2) + "%";
+
+    updateWave(intensity);
+    updateScreenWithCosValue(intensity);
+    updateAnalyzerRotation(angle);
+}
+
+
+
+window.onload = function() {
+    updateValues();
+};
+    </script>
+</body>
+</html>
